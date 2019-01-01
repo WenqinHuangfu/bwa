@@ -1,3 +1,16 @@
+## Seeding Part Execution Time Measurement By Shuangchen
+
+* `func:occ4` is the most time consuming function (48% by perf). Referring to Jason, this should be belong to the seeding part, therefore I believe it is the core seeding part.
+
+* Referring to Jason's paper, I choose the higher-level function `func:bwt_smem1a` as the highest-level seeding function, and then set it as the execution time and profiling target.
+
+* The program is multi-threading, the measurement code record the seeding time for each thread (by their TID).
+
+* The TRICKY part: it might end up with more threads than you set... for each "batch", it re-creates the threads, but some threads continue with the same TID but some not. Should kinda merge the results conservatively ( make CPU faster.., i.e., min(all-merged-thread-time) ).
+
+# ORIGINAL README
+
+
 [![Build Status](https://travis-ci.org/lh3/bwa.svg?branch=dev)](https://travis-ci.org/lh3/bwa)
 [![SourceForge Downloads](https://img.shields.io/sourceforge/dt/bio-bwa.svg)](https://sourceforge.net/projects/bio-bwa/files/?source=navbar)
 [![GitHub Downloads](https://img.shields.io/github/downloads/lh3/bwa/total.svg?style=flat)](https://github.com/lh3/bwa/releases)
