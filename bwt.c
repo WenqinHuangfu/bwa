@@ -35,6 +35,16 @@
 #include "bwt.h"
 #include "kvec.h"
 
+#include <time.h>
+#include <pthread.h>
+//////////////////////////////
+#include "measurement.h"
+#ifdef _MEASURE
+extern MEASURE_t *measure_seeding;
+extern pthread_mutex_t measure_lock;
+#endif
+///////////////////////////////
+
 #ifdef USE_MALLOC_WRAPPERS
 #  include "malloc_wrap.h"
 #endif
@@ -291,9 +301,58 @@ int bwt_smem1a(const bwt_t *bwt, int len, const uint8_t *q, int x, int min_intv,
 	int i, j, c, ret;
 	bwtintv_t ik, ok[4];
 	bwtintv_v a[2], *prev, *curr, *swap;
+  ////////////////////////
+#ifdef _MEASURE
+  double start, end;
+  int cur_tid = -1;
+  pthread_t threadId = pthread_self();
+  start = realtime();
 
+  for (i = 0; i < _MEASURE_MAX_THREADS; i++) {
+    if(measure_seeding[i].tid == threadId) {
+      cur_tid = i;
+      break;
+    }
+    if(measure_seeding[i].set == false) {
+      pthread_mutex_lock(&measure_lock);
+      for(j = i; j < _MEASURE_MAX_THREADS; j++) {
+        if(measure_seeding[j].set == false) {
+          measure_seeding[j].set = true;
+          measure_seeding[j].tid = threadId;
+          measure_seeding[j].first_active = start;
+          cur_tid = j;
+          break;
+        }
+      }
+      pthread_mutex_unlock(&measure_lock);
+      if(cur_tid == -1) {
+        fprintf(stderr, "\nthread measure structure setup error.\n");
+      }
+      else {
+        fprintf(stderr, "Thread-%d[%u] at %.10f sec\n", cur_tid, threadId, start);
+      }
+      break;
+    }
+  }
+  if(cur_tid == -1) {
+    fprintf(stderr, "\nthread measure structure lookup error\n");
+  }
+#endif
+  /////////////////////////// 
 	mem->n = 0;
-	if (q[x] > 3) return x + 1;
+	if (q[x] > 3) {
+  //////////////////////////
+#ifdef _MEASURE
+  pthread_mutex_lock(&measure_lock);
+  //measure_seeding[cur_tid].wall_time += end - start;
+  measure_seeding[cur_tid].last_active = start;
+  measure_seeding[cur_tid].call_count += 1;
+  pthread_mutex_unlock(&measure_lock);
+#endif
+  //////////////////////////
+    return x + 1;
+  }
+
 	if (min_intv < 1) min_intv = 1; // the interval size should be at least 1
 	kv_init(a[0]); kv_init(a[1]);
 	prev = tmpvec && tmpvec[0]? tmpvec[0] : &a[0]; // use the temporary vector if provided
@@ -347,6 +406,16 @@ int bwt_smem1a(const bwt_t *bwt, int len, const uint8_t *q, int x, int min_intv,
 
 	if (tmpvec == 0 || tmpvec[0] == 0) free(a[0].a);
 	if (tmpvec == 0 || tmpvec[1] == 0) free(a[1].a);
+///////////////////////////////////////
+#ifdef _MEASURE
+  end = realtime();
+  pthread_mutex_lock(&measure_lock);
+  measure_seeding[cur_tid].wall_time += end - start;
+  measure_seeding[cur_tid].last_active = end;
+  measure_seeding[cur_tid].call_count += 1;
+  pthread_mutex_unlock(&measure_lock);
+#endif
+//////////////////////////////////////
 	return ret;
 }
 

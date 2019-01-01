@@ -6,7 +6,13 @@
 #ifndef PACKAGE_VERSION
 #define PACKAGE_VERSION "0.7.17-r1194-dirty"
 #endif
-
+///////////////////////////////
+#include "measurement.h"
+#ifdef _MEASURE
+MEASURE_t *measure_seeding;
+pthread_mutex_t measure_lock;
+#endif
+//////////////////////////////
 int bwa_fa2pac(int argc, char *argv[]);
 int bwa_pac2bwt(int argc, char *argv[]);
 int bwa_bwtupdate(int argc, char *argv[]);
@@ -65,6 +71,23 @@ int main(int argc, char *argv[])
 	double t_real;
 	kstring_t pg = {0,0,0};
 	t_real = realtime();
+  //////////////////////////////////
+#ifdef _MEASURE
+  measure_seeding = malloc(_MEASURE_MAX_THREADS * sizeof(MEASURE_t));
+  for(i = 0; i< _MEASURE_MAX_THREADS; i++) {
+    measure_seeding[i].tid = 0;
+    measure_seeding[i].set = false;
+    measure_seeding[i].call_count = 0.0;
+    measure_seeding[i].first_active = 0.0;
+    measure_seeding[i].last_active = 0.0;
+    measure_seeding[i].wall_time = 0.0;
+  }
+  if(pthread_mutex_init(&measure_lock, NULL) != 0) {
+        fprintf(stderr, "\n mutex init failed\n");
+        return 1;
+  }
+#endif
+  ///////////////////////////////////
 	ksprintf(&pg, "@PG\tID:bwa\tPN:bwa\tVN:%s\tCL:%s", PACKAGE_VERSION, argv[0]);
 	for (i = 1; i < argc; ++i) ksprintf(&pg, " %s", argv[i]);
 	bwa_pg = pg.s;
@@ -98,6 +121,15 @@ int main(int argc, char *argv[])
 		for (i = 0; i < argc; ++i)
 			fprintf(stderr, " %s", argv[i]);
 		fprintf(stderr, "\n[%s] Real time: %.3f sec; CPU: %.3f sec\n", __func__, realtime() - t_real, cputime());
+    /////////////////////////////////////
+#ifdef _MEASURE
+    for(i = 0; i < _MEASURE_MAX_THREADS; i++) {
+      if(measure_seeding[i].set == true) {
+        fprintf(stderr, "Thread-%d[%u]: %.8f sec;\t %.0f calls; \t [%.10f\t -- %.10f]sec\n", i, measure_seeding[i].tid, measure_seeding[i].wall_time, measure_seeding[i].call_count, measure_seeding[i].first_active, measure_seeding[i].last_active);
+      }
+    } 
+#endif
+    ////////////////////////////////////////
 	}
 	free(bwa_pg);
 	return ret;

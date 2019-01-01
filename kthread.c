@@ -2,6 +2,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <limits.h>
+#include "kstring.h"
+#include <string.h>
+#include "utils.h"
 
 /************
  * kt_for() *
@@ -56,7 +59,10 @@ void kt_for(int n_threads, void (*func)(void*,long,int), void *data, long n)
 	tid = (pthread_t*)alloca(n_threads * sizeof(pthread_t));
 	for (i = 0; i < n_threads; ++i)
 		t.w[i].t = &t, t.w[i].i = i;
-	for (i = 0; i < n_threads; ++i) pthread_create(&tid[i], 0, ktf_worker, &t.w[i]);
+	for (i = 0; i < n_threads; ++i) {
+    pthread_create(&tid[i], 0, ktf_worker, &t.w[i]);
+    //fprintf(stderr, "tid kt-for [%d] is %u\n", i, tid[i]);
+  }
 	for (i = 0; i < n_threads; ++i) pthread_join(tid[i], 0);
 }
 
@@ -139,7 +145,10 @@ void kt_pipeline(int n_threads, void *(*func)(void*, int, void*), void *shared_d
 	}
 
 	tid = (pthread_t*)alloca(n_threads * sizeof(pthread_t));
-	for (i = 0; i < n_threads; ++i) pthread_create(&tid[i], 0, ktp_worker, &aux.workers[i]);
+	for (i = 0; i < n_threads; ++i) {
+     pthread_create(&tid[i], 0, ktp_worker, &aux.workers[i]);
+     //fprintf(stderr, "tid kt_pipeline-%d is %u\n", i, tid[i]);
+  }
 	for (i = 0; i < n_threads; ++i) pthread_join(tid[i], 0);
 
 	pthread_mutex_destroy(&aux.mutex);
