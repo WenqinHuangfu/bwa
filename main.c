@@ -12,6 +12,9 @@
 MEASURE_t *measure_seeding;
 pthread_mutex_t measure_lock;
 #endif
+#ifdef _SYNCTHREAD
+pthread_barrier_t sniper_barrier;
+#endif
 //////////////////////////////
 int bwa_fa2pac(int argc, char *argv[]);
 int bwa_pac2bwt(int argc, char *argv[]);
@@ -86,6 +89,9 @@ int main(int argc, char *argv[])
         fprintf(stderr, "\n mutex init failed\n");
         return 1;
   }
+#endif
+#ifdef _SYNCTHREAD
+  pthread_barrier_init(&sniper_barrier, NULL, _SYNC_NUM);
 #endif
   ///////////////////////////////////
 	ksprintf(&pg, "@PG\tID:bwa\tPN:bwa\tVN:%s\tCL:%s", PACKAGE_VERSION, argv[0]);

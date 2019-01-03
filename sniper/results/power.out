@@ -1,0 +1,17 @@
+[mcpat.py] Warning: McPAT requires inputs that are powers of two for some parameters. Increasing 20 to 32.
+                     Power     Energy    Energy %
+  core-core         2.69 W     0.07 mJ     14.91%
+  core-ifetch       0.68 W     0.02 mJ      3.78%
+  core-int          0.86 W     0.02 mJ      4.80%
+  core-fp           0.35 W     9.20 uJ      1.95%
+  core-mem          0.26 W     6.85 uJ      1.45%
+  core-other        1.47 W     0.04 mJ      8.13%
+  icache            0.52 W     0.01 mJ      2.88%
+  dcache            1.16 W     0.03 mJ      6.46%
+  l2                0.91 W     0.02 mJ      5.04%
+  dram              8.91 W     0.23 mJ     49.43%
+  other             0.21 W     5.56 uJ      1.18%
+
+  core              6.31 W     0.17 mJ     35.01%
+  cache             2.59 W     0.07 mJ     14.38%
+  total            18.03 W     0.47 mJ    100.00%

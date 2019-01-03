@@ -1,0 +1,20 @@
+--- logic.cc	2019-01-03 15:32:20.019634607 -0800
++++ logic.cc	2019-01-03 14:46:25.702321691 -0800
+@@ -594,7 +594,7 @@
+ 		}
+ 
+ 	    //power.readOp.dynamic = base_energy/clockRate + energy*stats_t.readAc.access;
+-	    power.readOp.dynamic = per_access_energy*stats_t.readAc.access + base_energy/clockRate;
++	    power.readOp.dynamic = per_access_energy*stats_t.readAc.access + base_energy/clockRate * (stats_t.readAc.access > 0);
+ 		double sckRation = g_tp.sckt_co_eff;
+ 		power.readOp.dynamic *= sckRation*FU_duty_cycle;
+ 		power.writeOp.dynamic *= sckRation;
+@@ -631,7 +631,7 @@
+ 		}
+ 
+ 	    //rt_power.readOp.dynamic = base_energy*executionTime + energy*stats_t.readAc.access;
+-	    rt_power.readOp.dynamic = per_access_energy*stats_t.readAc.access + base_energy*executionTime;
++	    rt_power.readOp.dynamic = per_access_energy*stats_t.readAc.access + base_energy*executionTime * (stats_t.readAc.access > 0);
+ 		double sckRation = g_tp.sckt_co_eff;
+ 		rt_power.readOp.dynamic *= sckRation;
+ 		rt_power.writeOp.dynamic *= sckRation;

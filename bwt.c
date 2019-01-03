@@ -38,10 +38,14 @@
 #include <time.h>
 #include <pthread.h>
 //////////////////////////////
+#include "sim_api.h"
 #include "measurement.h"
 #ifdef _MEASURE
 extern MEASURE_t *measure_seeding;
 extern pthread_mutex_t measure_lock;
+#endif
+#ifdef _SYNCTHREAD
+extern pthread_barrier_t sniper_barrier;
 #endif
 ///////////////////////////////
 
@@ -302,6 +306,10 @@ int bwt_smem1a(const bwt_t *bwt, int len, const uint8_t *q, int x, int min_intv,
 	bwtintv_t ik, ok[4];
 	bwtintv_v a[2], *prev, *curr, *swap;
   ////////////////////////
+#ifdef _SYNCTHREAD
+  pthread_barrier_wait(&sniper_barrier);
+#endif
+ 
 #ifdef _MEASURE
   double start, end;
   int cur_tid = -1;
@@ -337,11 +345,30 @@ int bwt_smem1a(const bwt_t *bwt, int len, const uint8_t *q, int x, int min_intv,
   if(cur_tid == -1) {
     fprintf(stderr, "\nthread measure structure lookup error\n");
   }
+  if(cur_tid == 0) {
+    fprintf(stderr, "Thread-%d\t %.0f calls; \t [%.10f]sec\n", cur_tid, measure_seeding[cur_tid].call_count, measure_seeding[cur_tid].last_active);
+    if(measure_seeding[cur_tid].call_count == 100) {
+      fprintf(stderr, "\n\n\n");
+      for(i = 0; i < _MEASURE_MAX_THREADS; i++) {
+        if(measure_seeding[i].set == true) {
+          fprintf(stderr, "Thread-%d[%u]: %.8f sec;\t %.0f calls; \t [%.10f\t -- %.10f]sec\n", i, measure_seeding[i].tid, measure_seeding[i].wall_time, measure_seeding[i].call_count, measure_seeding[i].first_active, measure_seeding[i].last_active);
+        }
+      }
+      //exit(1);
+    }
+  }
+
+  //SimRoiStart();
+  if(cur_tid == 0 && measure_seeding[cur_tid].call_count == 1)
+    SimRoiStart();
 #endif
   /////////////////////////// 
 	mem->n = 0;
 	if (q[x] > 3) {
   //////////////////////////
+  //SimRoiEnd();
+  //if(cur_tid == 0)
+  //  SimMarker(2, measure_seeding[0].call_count);
 #ifdef _MEASURE
   pthread_mutex_lock(&measure_lock);
   //measure_seeding[cur_tid].wall_time += end - start;
@@ -349,9 +376,16 @@ int bwt_smem1a(const bwt_t *bwt, int len, const uint8_t *q, int x, int min_intv,
   measure_seeding[cur_tid].call_count += 1;
   pthread_mutex_unlock(&measure_lock);
 #endif
+  if(cur_tid == 0 && measure_seeding[cur_tid].call_count == 100) {
+      exit(1);
+  }
   //////////////////////////
     return x + 1;
   }
+#ifdef _MEASURE
+  if(cur_tid == 0)
+    SimMarker(1, measure_seeding[0].call_count);
+#endif
 
 	if (min_intv < 1) min_intv = 1; // the interval size should be at least 1
 	kv_init(a[0]); kv_init(a[1]);
@@ -407,7 +441,16 @@ int bwt_smem1a(const bwt_t *bwt, int len, const uint8_t *q, int x, int min_intv,
 	if (tmpvec == 0 || tmpvec[0] == 0) free(a[0].a);
 	if (tmpvec == 0 || tmpvec[1] == 0) free(a[1].a);
 ///////////////////////////////////////
+  if(cur_tid == 0)
+    SimMarker(2, measure_seeding[0].call_count);
+
+  //SimRoiEnd();
+  if(cur_tid == 0 && measure_seeding[cur_tid].call_count == 100) {
+      SimRoiEnd();
+      exit(1);
+  }
 #ifdef _MEASURE
+ 
   end = realtime();
   pthread_mutex_lock(&measure_lock);
   measure_seeding[cur_tid].wall_time += end - start;

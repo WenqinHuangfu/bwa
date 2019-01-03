@@ -12,4 +12,5 @@ typedef struct {
 
 #define _MEASURE_MAX_THREADS 100
 #define _MEASURE
-
+//#define _SYNCTHREAD
+#define _SYNC_NUM 1
