@@ -1,4 +1,54 @@
+## Profiling Seeding Part with Sniper By Shuangchen
+
+1. uneven multi-thread
+
+* *[Problem]* threads are partitioned by matching task, and performs independently: both start time and execution time varies. When setting the ROI mark, I cannot ensure at one time slot, all threads are running the seeding part.
+
+* *[failed workaround]* add barrier at the begining of the seeding part. However, the thread scheduling in Sniper does not work too well, still end up with weird (e.g., two core idle, even uneven stats among cores) results for one ROI.
+
+* *[final workaround]* I have no options but just run single thread on a 16-core chip for gods sake..
+
+2. ROI marking
+
+* *[problem]* the ROI region is in thread function; it loops with non-intunitive control. I want to FF before first FOI, CACHE-only between ROIs, DETAIL in the ROI, and average it over 1000 iters.
+
+* *[solution]* I used `--roi-scripts` instead of `--roi` with setup the FF-DETAIL-CACHE-DETAIL-CACHE-DETIAL simulation style
+
+  * *[problem]* Sniper does not support, it can only do FF-DETAIL-xx, not back and force
+
+  * *[solution]* I have to take it the hard way. Use DETAIL mode to run a lot. It turns out not too bad. Plus, running the exe before simulation to "warm up" helps to reduce the simulation time.
+
+* *[solution]* I used `marker(a,b)` in sniper with `-s marker:stats` so that when `dumpstats.py -l` I can see all the markers
+
+  * *[problem]* However, there is a bug in sniper when use `marker` in multi-thread that the parameter `a/b` are not well set. e.g., they stuck at 4.
+
+  * *[workaround]* I changed the `sniper_stats_sqlite.py` to manully add index to read the xx-th marker
+
+  * *[problem]* when generate status with `--partial=mark-1:mark-100`, it does not add `mark-1-begin:mark-1-end + ... + mark-100:begin:mark-100:end`. Instead, it just returns `mark-1-begin:mark-100-end`.
+
+  * *[workaround]* I changed the `sniper_stats.py`
+
+3. UNEVEN performance
+
+* *[problem]* not only different threads behaves very differently (may be becuase of the code or the data or most likely, the Sniper thread scheduling and ROI setting), but singel thread behaves very differently between iters, also... say marker-90 has 90% LLC miss, marker-91 is like 40%, and marker-92 is 0%... not to mention number of instructions
+
+* *[finally]* I suck it up ... I give up for the averaging, but just pick the marker-90 for the result.
+
+4. McPAT bug
+
+* *[problem]* It ends up with 0 FP instruction but spend 30% dynamic energy on FP unit
+
+* *[solution]* McPAT bug in `logic.cc` where `dynPower = dynPowerPerAccess * NumAccess + BaseEenergy`. I change it to `dynPower = dynPowerPerAccess * NumAccess + BaseEenergy * (NumberAccess > 0)`. I have a patch. And then the mcpat bin should be copied to Sniper. It is version 1.3 so the `mapat.py` is also changed to call the new bin. 
+
+
+
+
+
+
+
 ## Seeding Part Execution Time Measurement By Shuangchen
+
+* *[update]* the ~50% execution time is on animal database in metageno case. In that case, it ends up with almost no match and therefore very small portion of alignment tasks. Later results on Human database brings the seeding execution time to ~30%.
 
 * `func:occ4` is the most time consuming function (48% by perf). Referring to Jason, this should be belong to the seeding part, therefore I believe it is the core seeding part.
 

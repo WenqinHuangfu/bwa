@@ -24,6 +24,8 @@ os.system("cp " + PATH_sniper + "/tools/sniper_stats.py " + PATH_sniper + "/tool
 os.system("cp ../sniper_stats.py " + PATH_sniper + "/tools/sniper_stats.py")
 os.system("cp " + PATH_sniper + "/tools/sniper_stats_sqlite.py " + PATH_sniper + "/tools/sniper_stats_sqlite.py.orig")
 os.system("cp ../sniper_stats_sqlite.py " + PATH_sniper + "/tools/sniper_stats_sqlite.py")
+os.system("cp " + PATH_sniper + "/tools/mcpat.py " + PATH_sniper + "/tools/mcpat.py.orig")
+os.system("cp ../mcpat.py " + PATH_sniper + "/tools/mcpat.py")
 
 os.system(PATH_sniper + "/tools/cpistack.py --partial=marker-1-90:marker-1-90 --time | tee \"cpi.out\"")
 #os.system(PATH_sniper + "/tools/cpistack.py --time --aggregate -o cpi-stack-agg")
@@ -39,4 +41,5 @@ for line in f:
 os.system("rm -rf ./tmp")
 os.system("cp " + PATH_sniper + "/tools/sniper_stats.py.orig " + PATH_sniper + "/tools/sniper_stats.py")
 os.system("cp " + PATH_sniper + "/tools/sniper_stats_sqlite.py.orig " + PATH_sniper + "/tools/sniper_stats_sqlite.py")
+os.system("cp " + PATH_sniper + "/tools/mcpat.py.orig " + PATH_sniper + "/tools/mcpat.py")
 os.chdir("../")
