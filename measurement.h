@@ -8,9 +8,11 @@ typedef struct {
   double last_active;
   double first_active;
   double wall_time;
+  double *list;
 } MEASURE_t;
 
 #define _MEASURE_MAX_THREADS 100
+#define _MEASURE_MAX_LIST 100000
 #define _MEASURE
 //#define _SYNCTHREAD
-#define _SYNC_NUM 1
+//#define _SYNC_NUM 1

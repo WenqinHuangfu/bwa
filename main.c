@@ -70,7 +70,7 @@ static int usage()
 int main(int argc, char *argv[])
 {
 	extern char *bwa_pg;
-	int i, ret;
+	int i, j,  ret;
 	double t_real;
 	kstring_t pg = {0,0,0};
 	t_real = realtime();
@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
     measure_seeding[i].first_active = 0.0;
     measure_seeding[i].last_active = 0.0;
     measure_seeding[i].wall_time = 0.0;
+    measure_seeding[i].list = malloc(_MEASURE_MAX_LIST * sizeof(double));
   }
   if(pthread_mutex_init(&measure_lock, NULL) != 0) {
         fprintf(stderr, "\n mutex init failed\n");
@@ -134,6 +135,19 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Thread-%d[%u]: %.8f sec;\t %.0f calls; \t [%.10f\t -- %.10f]sec\n", i, measure_seeding[i].tid, measure_seeding[i].wall_time, measure_seeding[i].call_count, measure_seeding[i].first_active, measure_seeding[i].last_active);
       }
     } 
+    FILE *output;
+    output = fopen("list.log", "w");
+    for(i = 0; i < _MEASURE_MAX_THREADS; i++) {
+      if(measure_seeding[i].set == true) {
+        for(j = 0; j < _MEASURE_MAX_LIST; j++) {
+          if(j >= measure_seeding[i].call_count) {
+            break;
+          }
+          fprintf(output, "%.10f,",  1e9 * measure_seeding[i].list[j]);
+        }
+      }
+    }
+    fclose(output);
 #endif
     ////////////////////////////////////////
 	}

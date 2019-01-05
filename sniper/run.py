@@ -27,6 +27,7 @@ os.system("cp ../sniper_stats_sqlite.py " + PATH_sniper + "/tools/sniper_stats_s
 os.system("cp " + PATH_sniper + "/tools/mcpat.py " + PATH_sniper + "/tools/mcpat.py.orig")
 os.system("cp ../mcpat.py " + PATH_sniper + "/tools/mcpat.py")
 
+os.system(PATH_sniper + "/tools/gen_simout.py --partial=marker-1-90:marker-1-90 | tee \"sim.out\"")
 os.system(PATH_sniper + "/tools/cpistack.py --partial=marker-1-90:marker-1-90 --time | tee \"cpi.out\"")
 #os.system(PATH_sniper + "/tools/cpistack.py --time --aggregate -o cpi-stack-agg")
 os.system(PATH_sniper + "/tools/mcpat.py --partial=marker-1-90:marker-1-90 | tee \"power.out\"")
