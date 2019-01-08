@@ -1,0 +1,1 @@
+0          [ 9466]  [  ]  [cache_base.cc       :  22]  *ERROR* Caches of non-power of 2 size need funky hash function

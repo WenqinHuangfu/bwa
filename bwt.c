@@ -346,7 +346,7 @@ int bwt_smem1a(const bwt_t *bwt, int len, const uint8_t *q, int x, int min_intv,
     fprintf(stderr, "\nthread measure structure lookup error\n");
   }
   if(cur_tid == 0) {
-    //fprintf(stderr, "Thread-%d\t %.0f calls; \t [%.10f]sec\n", cur_tid, measure_seeding[cur_tid].call_count, measure_seeding[cur_tid].last_active);
+    fprintf(stderr, "Thread-%d\t %.0f calls; \t [%.10f]sec\n", cur_tid, measure_seeding[cur_tid].call_count, measure_seeding[cur_tid].last_active);
     if(measure_seeding[cur_tid].call_count == 100) {
       fprintf(stderr, "\n\n\n");
       for(i = 0; i < _MEASURE_MAX_THREADS; i++) {
@@ -373,8 +373,8 @@ int bwt_smem1a(const bwt_t *bwt, int len, const uint8_t *q, int x, int min_intv,
   pthread_mutex_lock(&measure_lock);
   //measure_seeding[cur_tid].wall_time += end - start;
   measure_seeding[cur_tid].last_active = start;
-  if(measure_seeding[cur_tid].call_count < _MEASURE_MAX_LIST)
-    measure_seeding[cur_tid].list[(int)measure_seeding[cur_tid].call_count] = 0;
+  //if(measure_seeding[cur_tid].call_count < _MEASURE_MAX_LIST)
+  //  measure_seeding[cur_tid].list[(int)measure_seeding[cur_tid].call_count] = 0;
   measure_seeding[cur_tid].call_count += 1;
   pthread_mutex_unlock(&measure_lock);
 #endif
@@ -449,7 +449,7 @@ int bwt_smem1a(const bwt_t *bwt, int len, const uint8_t *q, int x, int min_intv,
   //SimRoiEnd();
   if(cur_tid == 0 && measure_seeding[cur_tid].call_count == 100) {
       SimRoiEnd();
-      //exit(1);
+      exit(1);
   }
 #ifdef _MEASURE
  
@@ -457,8 +457,8 @@ int bwt_smem1a(const bwt_t *bwt, int len, const uint8_t *q, int x, int min_intv,
   pthread_mutex_lock(&measure_lock);
   measure_seeding[cur_tid].wall_time += end - start;
   measure_seeding[cur_tid].last_active = end;
-  if(measure_seeding[cur_tid].call_count < _MEASURE_MAX_LIST)
-    measure_seeding[cur_tid].list[(int)measure_seeding[cur_tid].call_count] = end - start;
+  //if(measure_seeding[cur_tid].call_count < _MEASURE_MAX_LIST)
+  //  measure_seeding[cur_tid].list[(int)measure_seeding[cur_tid].call_count] = end - start;
   measure_seeding[cur_tid].call_count += 1;
   pthread_mutex_unlock(&measure_lock);
 #endif

@@ -1,4 +1,6 @@
 *.[oa]
+log
+results
 bwa
 test
 test64

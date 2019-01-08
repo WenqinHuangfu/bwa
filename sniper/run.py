@@ -8,17 +8,17 @@ PATH_sniper = "/home/shuangchenli/Sniper/"
 num_threads = 1
 exe = "/home/shuangchenli/workspace/bwa/bwa mem -t " + str(num_threads) + " /home/shuangchenli/workspace/bwa/data/GRCh38.fna /home/shuangchenli/workspace/bwa/data/simu.fastq"
 #var = ''
-var = '_LLCinf'
+var = '_135ns'
 
-#os.system(exe) # warm up tlb...
+os.system(exe) # warm up tlb...
 #os.system("rm -rf ./results" + var)
-#os.system("mkdir -p ./results" + var)
+os.system("mkdir -p ./results" + var)
 os.chdir("./results" + var)
 
 #os.system(PATH_sniper + "/run-sniper -c ../E5-2680v3" + var + ".cfg -n " + str(num_threads) + " --roi --no-cache-warming -- " + exe)
 #os.system(PATH_sniper + "/run-sniper -c ../E5-2680v3" + var + ".cfg -n " + str(num_threads) + " --roi-script --no-cache-warming -s roi-iter:1:50:100 -s markers:stats " + exe)
 #os.system(PATH_sniper + "/run-sniper -c ../E5-2680v3" + var + ".cfg -n " + str(num_threads) + " --roi --no-cache-warming -s markers:stats " + exe)
-#os.system(PATH_sniper + "/run-sniper -c ../E5-2680v3" + var + ".cfg -n 16 --roi --no-cache-warming -s markers:stats " + exe)
+os.system(PATH_sniper + "/run-sniper -c ../E5-2680v3" + var + ".cfg -n 16 --roi --no-cache-warming -s markers:stats " + exe)
 
 os.system("cp " + PATH_sniper + "/tools/sniper_stats.py " + PATH_sniper + "/tools/sniper_stats.py.orig")
 os.system("cp ../sniper_stats.py " + PATH_sniper + "/tools/sniper_stats.py")

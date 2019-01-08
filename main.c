@@ -135,6 +135,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Thread-%d[%u]: %.8f sec;\t %.0f calls; \t [%.10f\t -- %.10f]sec\n", i, measure_seeding[i].tid, measure_seeding[i].wall_time, measure_seeding[i].call_count, measure_seeding[i].first_active, measure_seeding[i].last_active);
       }
     } 
+/*
     FILE *output;
     output = fopen("list.log", "w");
     for(i = 0; i < _MEASURE_MAX_THREADS; i++) {
@@ -148,6 +149,7 @@ int main(int argc, char *argv[])
       }
     }
     fclose(output);
+*/
 #endif
     ////////////////////////////////////////
 	}
